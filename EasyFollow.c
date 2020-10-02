@@ -11,18 +11,9 @@ int sti;
 /* Function Prototypes */
 void run(U8 buf);
 
-DeclareCounter(SysTimerCnt);
-DeclareTask(EventDispatcher);
-DeclareTask(EventHandler);
-DeclareTask(Initialize);
-DeclareTask(SpeedTask);
-DeclareTask(BrakeTask);
-DeclareTask(IdleTask);
-DeclareTask(SonarSensing);
-DeclareEvent(TouchSensorOnEvent);
-DeclareEvent(TouchSensorOffEvent);
-DeclareEvent(event1);
-DeclareEvent(event2);
+DeclareResource(SpeedResource);
+DeclareResource(SonicResource);
+DeclareResource(AngleResource);
 
 #define RUNTIME_CONNECTION
 
