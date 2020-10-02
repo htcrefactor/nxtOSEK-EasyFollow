@@ -1,0 +1,10 @@
+# Makefile residues
+*.sh
+*.bin
+*.elf
+*.map
+*.h
+
+# Temporary files
+*~
+
