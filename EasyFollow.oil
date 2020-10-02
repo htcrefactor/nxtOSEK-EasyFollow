@@ -1,260 +1,298 @@
-#include "implementation. oil"
+#include "implementation.oil"
 CPU ATMEL_AT91SAM7S256
 {
-OS LEJOS_OSEK
-{
-STATUS = EXTENDED ;
-STARTUPHOOK = TRUE ;
-ERRORHOOK = FALSE ;
-SHUTDOWNHOOK = TRUE ;
-PRETASKHOOK = FALSE ;
-POSTTASKHOOK = FALSE ;
-USEGETSERVICEID = FALSE ;
-USEPARAMETERACCESS = FALSE ;
-USERESSCHEDULER = FALSE ;
-};
-/* Definition of application mode */
-APPMODE appmode1 {};
-/* ------------------------------------------------- */
-RESOURCE SpeedResource
-{
-RESOURCEPROPERTY = STANDARD ;
-};
-RESOURCE SonicResource
-{
-RESOURCEPROPERTY = STANDARD ;
-};
-RESOURCE SumoResource
-{
-RESOURCEPROPERTY = STANDARD ;
-};
-RESOURCE AngleResource
-{
-RESOURCEPROPERTY = STANDARD ;
-};
-/* ------------------------------------------------- */
-EVENT ErrorEvent
-{
-MASK = AUTO ;
-};
-/* ------------------------------------------------- */
-TASK speedTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 6;
-ACTIVATION = 1;
-SCHEDULE = FULL ; // - FULL : Task is preemptable -NON : Task is
-non - preemptable
-STACKSIZE = 512;
-RESOURCE = SpeedResource ;
-RESOURCE = SonicResource ;
-RESOURCE = SumoResource ;
-};
-TASK speedSamplingTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 2;
-ACTIVATION = 1;
-SCHEDULE = FULL ; // - FULL : Task is preemptable -NON : Task
-is non - preemptable
-STACKSIZE = 512;
-RESOURCE = SpeedResource ;
-};
-TASK steeringTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 8;
-ACTIVATION = 1;
-SCHEDULE = FULL ;
-STACKSIZE = 512;
-RESOURCE = AngleResource ;
-};
-TASK sonicSamplingTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 5;
-ACTIVATION = 1;
-SCHEDULE = FULL ;
-STACKSIZE = 512;
-RESOURCE = SonicResource ;
-};
-TASK sumoSamplingTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 4;
-ACTIVATION = 1;
-SCHEDULE = FULL ;
-STACKSIZE = 512;
-RESOURCE = SumoResource ;
-};
-TASK calculateAngleTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 3;
-ACTIVATION = 1;
-SCHEDULE = FULL ;
-STACKSIZE = 512;
-RESOURCE = AngleResource ;
-};
-TASK modeTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 7;
-ACTIVATION = 1;
-SCHEDULE = NON ;
-STACKSIZE = 512;
-};
-TASK errorHandlerTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 9;
-ACTIVATION = 1;
-SCHEDULE = FULL ;
-STACKSIZE = 512;
-EVENT = ErrorEvent ;
-};
-TASK debugTask
-{
-AUTOSTART = TRUE
-{
-APPMODE = appmode1 ;
-};
-PRIORITY = 1;
-ACTIVATION = 1;
-SCHEDULE = FULL ;
-STACKSIZE = 512;
-};
-/* ------------------------------------------------- */
-/* our only counter */
-COUNTER counter1
-{
-MINCYCLE = 1;
-MAXALLOWEDVALUE = 10000;
-TICKSPERBASE = 1;
-};
-/* ------------------------------------------------- */
-ALARM alarmForSonicSampling
-{
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK
-{
-TASK = sonicSamplingTask ;
-};
-AUTOSTART = TRUE
-{
-ALARMTIME = 1;
-CYCLETIME = 40;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmForSteering
-{
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK
-{
-TASK = steeringTask ;
-};
-AUTOSTART = TRUE
-{
-ALARMTIME = 1;
-CYCLETIME = 5;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmForSpeed
-{
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK
-{
-TASK = speedTask ;
-};
-AUTOSTART = TRUE
-{
-ALARMTIME = 1;
-CYCLETIME = 40;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmForSpeedSampling
-{
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK
-{
-TASK = speedSamplingTask ;
-};
-AUTOSTART = TRUE
-{
-ALARMTIME = 1;
-CYCLETIME = 50;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmForSumoSampling {
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK {
-TASK = sumoSamplingTask ;
-};
-AUTOSTART = TRUE {
-ALARMTIME = 1;
-CYCLETIME = 40;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmForCalculateAngle {
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK {
-TASK = calculateAngleTask ;
-};
-AUTOSTART = TRUE {
-ALARMTIME = 1;
-CYCLETIME = 40;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmMode {
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK {
-TASK = modeTask ;
-};
-AUTOSTART = TRUE {
-ALARMTIME = 1;
-CYCLETIME = 10;
-APPMODE = appmode1 ;
-};
-};
-ALARM alarmForDebugTask {
-COUNTER = counter1 ;
-ACTION = ACTIVATETASK {
-TASK = debugTask ;
-};
-AUTOSTART = TRUE {
-ALARMTIME = 1;
-CYCLETIME = 500;
-APPMODE = appmode1 ;
-};
-};
+    OS LEJOS_OSEK
+    {
+        STATUS = EXTENDED;
+        STARTUPHOOK = TRUE;
+        ERRORHOOK = FALSE;
+        SHUTDOWNHOOK = TRUE;
+        PRETASKHOOK = FALSE;
+        POSTTASKHOOK = FALSE;
+        USEGETSERVICEID = FALSE;
+        USEPARAMETERACCESS = FALSE;
+        USERESSCHEDULER = FALSE;
+    };
+
+    /* Definition of application mode */
+    APPMODE appmode1{};
+    
+    /* ------------------------------------------------- */
+    
+    RESOURCE SpeedResource
+    {
+        RESOURCEPROPERTY = STANDARD;
+    };
+    RESOURCE SonicResource
+    {
+        RESOURCEPROPERTY = STANDARD;
+    };
+    RESOURCE SumoResource
+    {
+        RESOURCEPROPERTY = STANDARD;
+    };
+    RESOURCE AngleResource
+    {
+        RESOURCEPROPERTY = STANDARD;
+    };
+    
+    /* ------------------------------------------------- */
+    
+    EVENT ErrorEvent
+    {
+        MASK = AUTO;
+    };
+    
+    /* ------------------------------------------------- */
+    
+    TASK speedTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 6;
+        ACTIVATION = 1;
+        SCHEDULE = FULL; // - FULL : Task is preemptable -NON : Task is
+        non - preemptable
+                  STACKSIZE = 512;
+        RESOURCE = SpeedResource;
+        RESOURCE = SonicResource;
+        RESOURCE = SumoResource;
+    };
+    
+    TASK speedSamplingTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 2;
+        ACTIVATION = 1;
+        SCHEDULE = FULL; // - FULL : Task is preemptable -NON : Task
+        is non - preemptable
+                     STACKSIZE = 512;
+        RESOURCE = SpeedResource;
+    };
+    
+    TASK steeringTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 8;
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512;
+        RESOURCE = AngleResource;
+    };
+    
+    TASK sonicSamplingTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 5;
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512;
+        RESOURCE = SonicResource;
+    };
+    
+    TASK sumoSamplingTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 4;
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512;
+        RESOURCE = SumoResource;
+    };
+    
+    TASK calculateAngleTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 3;
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512;
+        RESOURCE = AngleResource;
+    };
+    
+    TASK modeTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 7;
+        ACTIVATION = 1;
+        SCHEDULE = NON;
+        STACKSIZE = 512;
+    };
+    
+    TASK errorHandlerTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 9;
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512;
+        EVENT = ErrorEvent;
+    };
+    
+    TASK debugTask
+    {
+        AUTOSTART = TRUE
+        {
+            APPMODE = appmode1;
+        };
+        PRIORITY = 1;
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512;
+    };
+    
+    /* ------------------------------------------------- */
+    
+    /* our only counter */
+    COUNTER counter1
+    {
+        MINCYCLE = 1;
+        MAXALLOWEDVALUE = 10000;
+        TICKSPERBASE = 1;
+    };
+    
+    /* ------------------------------------------------- */
+    
+    ALARM alarmForSonicSampling
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = sonicSamplingTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 40;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmForSteering
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = steeringTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 5;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmForSpeed
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = speedTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 40;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmForSpeedSampling
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = speedSamplingTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 50;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmForSumoSampling
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = sumoSamplingTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 40;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmForCalculateAngle
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = calculateAngleTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 40;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmMode
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = modeTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 10;
+            APPMODE = appmode1;
+        };
+    };
+    
+    ALARM alarmForDebugTask
+    {
+        COUNTER = counter1;
+        ACTION = ACTIVATETASK
+        {
+            TASK = debugTask;
+        };
+        AUTOSTART = TRUE
+        {
+            ALARMTIME = 1;
+            CYCLETIME = 500;
+            APPMODE = appmode1;
+        };
+    };
 };
