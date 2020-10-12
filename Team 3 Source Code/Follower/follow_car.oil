@@ -1,0 +1,182 @@
+#include "implementation.oil"
+
+CPU ATMEL_AT91SAM7S256
+{
+  OS LEJOS_OSEK
+  {
+    STATUS = EXTENDED;
+    STARTUPHOOK = FALSE;
+    ERRORHOOK = FALSE;
+    SHUTDOWNHOOK = FALSE;
+    PRETASKHOOK = FALSE;
+    POSTTASKHOOK = FALSE;
+    USEGETSERVICEID = FALSE;
+    USEPARAMETERACCESS = FALSE;
+    USERESSCHEDULER = FALSE;
+  };
+
+  /* Definition of application mode */
+  APPMODE appmode1{};
+
+  RESOURCE R1
+  {
+    RESOURCEPROPERTY = STANDARD;
+  };
+  RESOURCE OtherResource{
+    RESOURCEPROPERTY = STANDARD;
+  };
+
+  /* Definition of Touch Sensor ON Event */
+  EVENT TouchSensorOnEvent{
+    MASK = AUTO;
+  };
+
+  /* Definition of Touch Sensor OFF Event */
+  EVENT TouchSensorOffEvent{
+    MASK = AUTO;
+  };
+
+
+
+//초음파 센서의 우선순위를 EventDispatcher 보다 높게 주어서 초음파 센서의 코드는 간단하지만
+//빠르게 수정하면서 NXT가 고속으로 이동할 때의 반응성을 높인다. 
+//이는 우리의 입장에서는 12ms과 30ms이상의 값이 크게 차이가 없어보이지만 NXT에서 차이를 
+//비교하면 반응속도의 차이는 확실하게 나타났다. 따라서 고속으로 주행하기 위해서 최적의 초음파 센서의 주기와
+// 초음파 센서의 유효거리 조합을 찾았고 주기 12ms와 거리 50cm 이내라는 조합을 찾았고 어느정도의 고속 주행이 가능하였다. 
+
+  TASK SonarSensing
+  {
+    RESOURCE = OtherResource;
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    PRIORITY = 5;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+  };
+  TASK EventDispatcher
+  {
+    AUTOSTART = FALSE;
+    PRIORITY = 4;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+  };
+
+  TASK Initialize
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    PRIORITY = 6;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+    RESOURCE = R1;
+  };
+
+  TASK SpeedTask
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    EVENT = event1;
+    PRIORITY = 7;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+    RESOURCE = R1;
+  };
+  TASK BrakeTask
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    EVENT = event2;
+    PRIORITY = 8;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+    RESOURCE = R1;
+  };
+
+
+  /* Definition of EventHandler */
+  TASK EventHandler
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    PRIORITY = 3;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+    EVENT = TouchSensorOnEvent;
+    EVENT = TouchSensorOffEvent;
+  };
+
+  /* Definition of IdleTask */
+  TASK IdleTask
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    PRIORITY = 1;
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+  };
+  EVENT event1
+  {
+    MASK = AUTO;
+  };
+  EVENT event2
+  {
+    MASK = AUTO;
+  };
+
+  /* Definition of OSEK Alarm Counter */
+  COUNTER SysTimerCnt
+  {
+    MINCYCLE = 1;
+    MAXALLOWEDVALUE = 10000;
+    TICKSPERBASE = 1; /* One tick is equal to 1msec */
+  };
+
+  /* Definition of EventDispatcher execution timing */
+  ALARM cyclic_alarm1
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+      TASK = EventDispatcher;
+    };
+    AUTOSTART = TRUE
+    {
+      ALARMTIME = 1;
+      CYCLETIME = 5; /* Executed every 5msec */
+      APPMODE = appmode1;
+    };
+  };  
+  ALARM cyclic_alarm2
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+        TASK = SonarSensing;
+    };
+    AUTOSTART = TRUE
+    {
+        ALARMTIME = 1;
+        CYCLETIME = 12; /* Executed every 500msec */
+        APPMODE = appmode1;
+    };
+  };
+};
